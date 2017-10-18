@@ -68,8 +68,8 @@ task usercontrol()
 
   while (true)
   {
-    motor[leftMotor] = vexRT[Ch3];
-    motor[rightMotor] = vexRT[Ch2];
+    motor[leftMotor] = vexRT[Ch3Xmtr2];
+    motor[rightMotor] = vexRT[Ch2Xmtr2];
 
 
 
