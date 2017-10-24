@@ -1,11 +1,8 @@
 #pragma config(UART_Usage, UART1, uartVEXLCD, baudRate19200, IOPins, None, None)
 #pragma config(UART_Usage, UART2, uartNotUsed, baudRate4800, IOPins, None, None)
-#pragma config(I2C_Usage, I2C1, i2cSensors)
-#pragma config(Sensor, I2C_1,  ,               sensorQuadEncoderOnI2CPort,    , AutoAssign )
-#pragma config(Sensor, I2C_2,  ,               sensorQuadEncoderOnI2CPort,    , AutoAssign )
 #pragma config(Motor,  port1,           rotateMotor,   tmotorVex393_HBridge, openLoop)
-#pragma config(Motor,  port2,           leftMotor,     tmotorVex393_MC29, PIDControl, driveLeft, encoderPort, I2C_1)
-#pragma config(Motor,  port3,           rightMotor,    tmotorVex393_MC29, PIDControl, reversed, driveRight, encoderPort, I2C_2)
+#pragma config(Motor,  port2,           leftMotor,     tmotorVex393_MC29, openLoop, reversed, driveLeft)
+#pragma config(Motor,  port3,           rightMotor,    tmotorVex393_MC29, openLoop, driveRight)
 #pragma config(Motor,  port4,           clawMotor,     tmotorVex393_MC29, openLoop)
 #pragma config(Motor,  port5,           bRackMotor,    tmotorVex393_MC29, openLoop)
 #pragma config(Motor,  port6,           bRackMotor2,   tmotorVex393_MC29, openLoop, reversed)
@@ -24,6 +21,7 @@
 #include "Vex_Competition_Includes.c"
 
 float countsPerYard = 600;
+int wristPos = 0;
 
 
 /*---------------------------------------------------------------------------*/
@@ -57,12 +55,16 @@ void pre_auton()
 
 }
 void driveTurn(int speed, int waitTime ) {
-	motor[rightMotor] = speed
+	motor[rightMotor] = speed;
 	wait1Msec(waitTime);
 	motor[rightMotor] = 0;
 	motor[leftMotor] = -speed;
 	wait1Msec(waitTime);
 	motor[leftMotor] = 0;
+}
+
+void autoFlip () {
+
 }
 
 void driveStraight(int distanceIN, int speed) {
@@ -102,7 +104,7 @@ task autonomous()
 
 	//}
 	//startTask(winch)
-	sleep(1000)
+	sleep(1000);
 
 }
 
@@ -121,28 +123,61 @@ task usercontrol()
 
 	while (true)
 	{
-		motor[leftMotor] = vexRT[Ch3];
-		motor[rightMotor] = vexRT[Ch2];
+		motor[leftMotor] = (vexRT[Ch3] * 3) / 4;
+		motor[rightMotor] = (vexRT[Ch2] * 3) / 4;
 
-		motor[bRackMotor] = vexRT[Ch3Xmtr2];
-		motor[tRackMotor] = vexRT[Ch2Xmtr2];
+		motor[tRackMotor] = -vexRT[Ch2Xmtr2];
 
-		if (Math.fabs(vexRT[Ch1Xmtr2]) > 50) {
-			if (vexRT[Ch1Xmtr2] > 0) {
-				motor[rackRotater] = 60;
+		//motor[clawMotor] = vexRT[Ch1];
+
+
+		if (fabs(vexRT[Ch3Xmtr2]) > 50) {
+			if (vexRT[Ch3Xmtr2] > 0) {
+				motor[bRackMotor] = 60;
+				} else {
+				motor[bRackMotor] = -60;
+			}
+			} else {
+			motor[bRackMotor] = 0;
+		}
+
+		if (fabs(vexRT[Ch4Xmtr2]) > 50) {
+			if (vexRT[Ch4Xmtr2] > 0) {
+				motor[rackRotater] = 30;
 				} else {
 				motor[rackRotater] = -60;
 			}
+		} else {
+			motor[rackRotater] = -10;
 		}
 
 		if (vexRT[Btn8RXmtr2]) {
-			if (motor[wristMotor] > -127) {
-				motor[wristMotor] -= 1;
+			if (wristPos > -127) {
+				wristPos -= 1;
 			}
-			} else if (vexRT[Btn8LXmtr2]) {
-			if (motor[wristMotor] < 127) {
-				motor[wristMotor] += 1;
+		} else if (vexRT[Btn8LXmtr2]) {
+			if (wristPos < 127) {
+				wristPos +=1;
 			}
+		}
+		motor[wristMotor] = wristPos;
+
+		if (vexRT[Btn7UXmtr2]) {
+			motor[clawMotor] = 50;
+		} else if (vexRT[Btn7DXmtr2]) {
+			motor[clawMotor] = -50;
+		} else {
+			motor[clawMotor] = -5;
+		}
+
+
+
+		if (vexRT[Btn7RXmtr2]) {
+			motor[rotateMotor] = 50;
+			} else if (vexRT[Btn7LXmtr2]) {
+			motor[rotateMotor] = -50;
+			} else {
+			motor[rotateMotor] = 0;
 		}
 
 	}
