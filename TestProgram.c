@@ -61,14 +61,6 @@ void pre_auton()
 	// bDisplayCompetitionStatusOnLcd = false;
 
 }
-void driveTurn(int speed, int waitTime ) {
-	motor[rightMotor] = speed;
-	wait1Msec(waitTime);
-	motor[rightMotor] = 0;
-	motor[leftMotor] = -speed;
-	wait1Msec(waitTime);
-	motor[leftMotor] = 0;
-}
 
 static const float fudgeCountsWhenSomethingsTotallyJankedUp = 1.11;
 static const float ticksPerInch = 0.95 * (627.2 / (4.1 * PI));
@@ -103,22 +95,7 @@ void turn(float dist, int speed, bool hold)
 
 }
 
-void autoFlip () {
 
-}
-
-void driveStraight(int distanceIN, int speed) {
-	moveMotorTarget(leftMotor, (distanceIN * (countsPerYard / 36.0)), speed, false);
-	moveMotorTarget(rightMotor, (distanceIN * (countsPerYard / 36.0)), speed, false);
-}
-
-bool driveStraightComplete() {
-	if(getMotorTargetCompleted(leftMotor) && getMotorTargetCompleted(rightMotor)) {
-		return true;
-		}	else {
-		return false;
-	}
-}
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
 /*                              Autonomous Task                              */
@@ -208,7 +185,7 @@ task usercontrol()
 		motor[rightMotor] = right;
 
 		if (fabs(vexRT[Ch2Xmtr2]) < 10) {
-			motor[rackRotater] = -10;
+			motor[rackRotater] = -15;
 		} else {
 			motor[rackRotater] = -(vexRT[Ch2Xmtr2] / 2);
 		}
