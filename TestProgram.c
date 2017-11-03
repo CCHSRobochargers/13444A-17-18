@@ -26,10 +26,9 @@
 
 float countsPerYard = 600;
 float countsPerRev = 627.2;
-float left = 0;
-float right = 0;
+float leftSpeed = 0;
+float rightSpeed = 0;
 bool pinch = false;
-int driveSeed = 0;
 
 
 /*---------------------------------------------------------------------------*/
@@ -69,6 +68,7 @@ static const float ticksPerRev = fudgeCountsWhenSomethingsTotallyJankedUp * (tic
 //Drive Straight
 void straight(float dist, int speed, bool hold)
 {
+
 
 	resetMotorEncoder(rightMotor);
 	resetMotorEncoder(leftMotor);
@@ -116,7 +116,7 @@ task autonomous()
 	sleep(1000);
 	setMotorTarget(rackRotater, -1500, -75, false);
 	sleep(500);
-	straight(42, 100, false);
+	straight(30, 100, false);
 	setMotorTarget(rackRotater, -750, 40, false);
 	sleep(500);
 	setMotorTarget(clawMotor, .50 * countsPerRev, 75, false);
@@ -148,41 +148,41 @@ task usercontrol()
 	while (true)
 	{
 
-		left = (vexRT[Ch3] * 3) / 4;
-		right = (vexRT[Ch2] * 3) / 4;
+		leftSpeed = (vexRT[Ch3] * 3) / 4;
+		rightSpeed = (vexRT[Ch2] * 3) / 4;
 
 		// Fork D-Pad
 		if (vexRT[Btn8U]) {
-			left = -80;
-			right = -80;
+			leftSpeed = -80;
+			rightSpeed = -80;
 		} else if (vexRT[Btn8R]) {
-			left = 35;
-			right = -35;
+			leftSpeed = 35;
+			rightSpeed = -35;
 		} else if (vexRT[Btn8D]) {
-			left = 80;
-			right = 80;
+			leftSpeed = 80;
+			rightSpeed = 80;
 		} else if (vexRT[Btn8L]) {
-			left = -35;
-			right = 35;
+			leftSpeed = -35;
+			rightSpeed = 35;
 		}
 
 		// Claw D-Pad
 		if (vexRT[Btn7U]) {
-			left = 80;
-			right = 80;
+			leftSpeed = 80;
+			rightSpeed = 80;
 		} else if (vexRT[Btn7R]) {
-			left = -35;
-			right = 35;
+			leftSpeed = -35;
+			rightSpeed = 35;
 		} else if (vexRT[Btn7D]) {
-			left = -80;
-			right = -80;
+			leftSpeed = -80;
+			rightSpeed = -80;
 		} else if (vexRT[Btn7L]) {
-			left = 35;
-			right = -35;
+			leftSpeed = 35;
+			rightSpeed = -35;
 		}
 
-		motor[leftMotor] = left;
-		motor[rightMotor] = right;
+		motor[leftMotor] = leftSpeed;
+		motor[rightMotor] = rightSpeed;
 
 		if (fabs(vexRT[Ch2Xmtr2]) < 10) {
 			motor[rackRotater] = -15;
