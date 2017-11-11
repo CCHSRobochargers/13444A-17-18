@@ -31,6 +31,13 @@ float leftSpeed = 0;
 float rightSpeed = 0;
 bool pinch = false;
 
+void LCDManager (const string line1, const string line2) {
+	clearLCDLine(0);
+	clearLCDLine(1);
+	displayLCDString(0, 0, line1);
+	displayLCDString(1, 0, line2);
+}
+
 
 /*---------------------------------------------------------------------------*/
 /*                          Pre-Autonomous Functions                         */
@@ -62,7 +69,10 @@ void pre_auton()
 	// Set bDisplayCompetitionStatusOnLcd to false if you don't want the LCD
 	// used by the competition include file, for example, you might want
 	// to display your team name on the LCD in this function.
-	// bDisplayCompetitionStatusOnLcd = false;
+	bDisplayCompetitionStatusOnLcd = false;
+
+	LCDManager("Pre_Autonomous", "Status: Success");
+
 
 }
 
@@ -73,7 +83,7 @@ static const float ticksPerRev = fudgeCountsWhenSomethingsTotallyJankedUp * (tic
 //Drive Straight
 void straight(float dist, int speed, bool hold)
 {
-
+	LCDManager("Straight Move", "");
 
 	resetMotorEncoder(rightMotor);
 	resetMotorEncoder(leftMotor);
@@ -89,6 +99,8 @@ void straight(float dist, int speed, bool hold)
 void turn(float dist, int speed, bool hold)
 {
 
+	LCDManager("Turn Move       ", "                ");
+
 	resetMotorEncoder(rightMotor);
 	resetMotorEncoder(leftMotor);
 
@@ -99,6 +111,7 @@ void turn(float dist, int speed, bool hold)
 		wait1Msec(10);
 
 }
+
 
 
 /*---------------------------------------------------------------------------*/
@@ -115,6 +128,7 @@ void turn(float dist, int speed, bool hold)
 
 task autonomous()
 {
+	LCDManager("Autonomous", "Beginning");
 	nMotorPIDSpeedCtrl[leftLift] = RegIdle;
 	nMotorPIDSpeedCtrl[rightLift] = RegIdle;
 	//setMotorTarget(clawMotor, -.80 * countsPerRev, -25, false);
@@ -137,11 +151,11 @@ task autonomous()
 	motor[leftLift] = 100;
 	sleep(600);
 	motor[leftLift] = 0;
-	straight(-24, 127, false);
-	motor[leftLift] = -100;
-	sleep(600);
-	motor[leftLift] = 0;
-	straight(60, 127, false);
+	//straight(-24, 127, false);
+	//motor[leftLift] = -100;
+	//sleep(600);
+	//motor[leftLift] = 0;
+	//straight(60, 127, false);
 
 
 
