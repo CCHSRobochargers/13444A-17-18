@@ -246,13 +246,13 @@ task usercontrol()
 
 
 		if (vexRT[Btn7UXmtr2]) {
-			motor[clawMotor] = 75;
+			motor[clawMotor] = 127;
 			pinch = false;
 		} else if (vexRT[Btn7DXmtr2]) {
-			motor[clawMotor] = -100;
+			motor[clawMotor] = -127;
 			pinch = true;
 		} else if (pinch) {
-			motor[clawMotor] = -12;
+			motor[clawMotor] = -16;
 		} else if (!pinch) {
 			motor[clawMotor] = 0;
 		}
