@@ -76,7 +76,7 @@ void pre_auton()
 
 }
 
-static const float fudgeCountsWhenSomethingsTotallyJankedUp = 1.11;
+static const float fudgeCountsWhenSomethingsTotallyJankedUp = 1.34;
 static const float ticksPerInch = 0.95 * (627.2 / (4.1 * PI));
 static const float ticksPerRev = fudgeCountsWhenSomethingsTotallyJankedUp * (ticksPerInch * 15.125 * PI);
 
@@ -131,8 +131,22 @@ task autonomous()
 	LCDManager("Autonomous", "Beginning");
 	nMotorPIDSpeedCtrl[leftLift] = RegIdle;
 	nMotorPIDSpeedCtrl[rightLift] = RegIdle;
+
+	motor[clawMotor] = -15;
+	sleep(2500);
+	setMotorTarget(linkageMotor, 7 * -.46 * countsPerRev, -100, true);
+	sleep(3500);
+	straight(19, 127, false);
+	sleep(1000);
+	moveMotorTarget(linkageMotor, 2000, 20, true);
+	sleep(1500)
+	motor[clawMotor] = 50;
+	sleep(500);
+	motor[clawMotor] = 50;
+	straight(-17, 127, false);
+	LCDManager("Autonomous", "Completed");
 	//setMotorTarget(clawMotor, -.80 * countsPerRev, -25, false);
-	motor[clawMotor] = -20;
+	/*motor[clawMotor] = -20;
 	sleep(1000);
 	motor[clawMotor] = -15;
 	setMotorTarget(linkageMotor, -1500, -75, false);
@@ -155,7 +169,7 @@ task autonomous()
 	//motor[leftLift] = -100;
 	//sleep(600);
 	//motor[leftLift] = 0;
-	//straight(60, 127, false);
+	//straight(60, 127, false);*/
 
 
 
@@ -173,7 +187,7 @@ task autonomous()
 
 task usercontrol()
 {
-
+	LCDManager("Driver-Ctlr", "");
 	//PID fixup
 	nMotorPIDSpeedCtrl[rightMotor] = RegIdle;
 	nMotorPIDSpeedCtrl[leftMotor] = RegIdle;
@@ -232,10 +246,10 @@ task usercontrol()
 
 
 		if (vexRT[Btn7UXmtr2]) {
-			motor[clawMotor] = 50;
+			motor[clawMotor] = 75;
 			pinch = false;
 		} else if (vexRT[Btn7DXmtr2]) {
-			motor[clawMotor] = -50;
+			motor[clawMotor] = -100;
 			pinch = true;
 		} else if (pinch) {
 			motor[clawMotor] = -12;
