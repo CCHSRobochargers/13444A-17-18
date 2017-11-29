@@ -29,13 +29,10 @@ float countsPerYard = 600;
 float countsPerRev = 627.2;
 float leftSpeed = 0;
 float rightSpeed = 0;
-int failCounter = 0;
+long delayTime = 0;
 bool pinch = false;
-bool rightMotorEncoderReset = false;
-bool leftMotorEncoderReset = false;
-bool rightLiftEncoderReset = false;
-bool leftLiftEncoderReset = false;
-bool linkageMotorEncoderReset = false;
+string nums[] = {"zero", "one", "two", "three", "four", "five", "six"};
+
 
 void LCDManager (const string line1, const string line2) {
 	clearLCDLine(0);
@@ -66,90 +63,41 @@ void pre_auton()
 	slaveMotor(rightLift, leftLift);
 	slaveMotor(leftSlave, leftMotor);
 	slaveMotor(rightSlave, rightMotor);
-	// Set bStopTasksBetweenModes to false if you want to keep user created tasks
-	// running between Autonomous and Driver controlled modes. You will need to
-	// manage all user created tasks if set to false.
+
+	//Competition-control extension variables
 	bStopTasksBetweenModes = true;
+	bDisplayCompetitionStatusOnLcd = false;
 
 	while (nLCDButtons != 2 && bIfiRobotDisabled){
 		sleep (10);
 		LCDManager ("Waiting for", "user input");
 	}
 
-	sleep(1000);
 	resetMotorEncoder(leftMotor);
-	if (getEncoderForMotor(leftMotor) == 0) {
-		playTone (1760,50);
-		sleep (500);
-		playTone (1760, 50);
-	} else {
-		playTone (220, 150);
-		leftMotorEncoderReset = true;
-		failCounter++;
-	}
-	sleep(1000);
 	resetMotorEncoder(rightMotor);
-	if (getEncoderForMotor(rightMotor) == 0) {
-		playTone (1760,50);
-		sleep (500);
-		playTone (1760, 50);
-	} else {
-		playTone (220, 150);
-		rightMotorEncoderReset = true;
-		failCounter++;
-	}
-	sleep(1000);
-	resetMotorEncoder(linkageMotor);
-	if (getEncoderForMotor(linkageMotor) == 0) {
-		playTone (1760, 50);
-		sleep (500);
-		playTone (1760, 50);
-	} else {
-		playTone (220, 150);
-		linkageMotorEncoderReset = true;
-		failCounter++;
-	}
-	sleep(1000);
 	resetMotorEncoder(leftLift);
-	if (getEncoderForMotor(leftLift) == 0) {
-		playTone (1760,50);
-		sleep (500);
-		playTone (1760, 50);
-	} else {
-		playTone (220, 150);
-		leftLiftEncoderReset = true;
-		failCounter++;
-	}
-	sleep(1000);
 	resetMotorEncoder(rightLift);
-	if (getEncoderForMotor(rightLift) == 0) {
-		playTone (1760,50);
-		sleep (500);
-		playTone (1760, 50);
-	} else {
-		playTone (220, 150);
-		rightLiftEncoderReset = true;
-		failCounter++;
-	}
-
-	//LCDManager(5 - failCounter) + " Succeeded", failCounter + " Failed");
-
-
-
-
-
-
-
-
-
-	// Set bDisplayCompetitionStatusOnLcd to false if you don't want the LCD
-	// used by the competition include file, for example, you might want
-	// to display your team name on the LCD in this function.
-	bDisplayCompetitionStatusOnLcd = false;
+	resetMotorEncoder(linkageMotor);
 
 	LCDManager("Pre_Autonomous", "Status: Success");
 
+	sleep(1000);
 
+	while (bIfiRobotDisabled) {
+		LCDManager("Delay (sec)", nums[delayTime]);
+		if (nLCDButtons == 1) { // left
+			if (delayTime > 0) {
+				delayTime -= 1;
+			}
+		}	else if (nLCDButtons == 4) { // right
+			if (delayTime < 6) {
+				delayTime += 1;
+			}
+		}
+		while (nLCDButtons == 1 || nLCDButtons == 4) {
+			sleep(10);
+		}
+	}
 }
 
 static const float fudgeCountsWhenSomethingsTotallyJankedUp = 1.34;
@@ -174,7 +122,6 @@ void straight(float dist, int speed, bool hold)
 
 void turn(float dist, int speed, bool hold)
 {
-
 	LCDManager("Turn Move       ", "                ");
 
 	resetMotorEncoder(rightMotor);
@@ -185,10 +132,7 @@ void turn(float dist, int speed, bool hold)
 
 	while (!getMotorTargetCompleted(rightMotor) && !getMotorTargetCompleted(leftMotor))
 		wait1Msec(10);
-
 }
-
-
 
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
@@ -200,55 +144,23 @@ void turn(float dist, int speed, bool hold)
 /*  You must modify the code to add your own robot specific commands here.   */
 /*---------------------------------------------------------------------------*/
 
-
-
 task autonomous()
 {
 	LCDManager("Autonomous", "Beginning");
-	nMotorPIDSpeedCtrl[leftLift] = RegIdle;
-	nMotorPIDSpeedCtrl[rightLift] = RegIdle;
-
-	motor[clawMotor] = -15;
-	sleep(2500);
-	setMotorTarget(linkageMotor, 7 * -.46 * countsPerRev, -100, true);
-	sleep(3500);
-	straight(19, 127, false);
-	sleep(1000);
+	sleep(delayTime * 1000);
+	motor[clawMotor] = -40;
+	sleep(800);
+	setMotorTarget(linkageMotor, 7 * -.42 * countsPerRev, 127, true);
+	sleep(2000);
+	straight(17, 127, false);
+	sleep(50);
 	moveMotorTarget(linkageMotor, 2000, 20, true);
 	sleep(1500);
 	motor[clawMotor] = 50;
 	sleep(500);
-	motor[clawMotor] = 50;
+	motor[clawMotor] = 0;
 	straight(-17, 127, false);
 	LCDManager("Autonomous", "Completed");
-	//setMotorTarget(clawMotor, -.80 * countsPerRev, -25, false);
-	/*motor[clawMotor] = -20;
-	sleep(1000);
-	motor[clawMotor] = -15;
-	setMotorTarget(linkageMotor, -1500, -75, false);
-	sleep(500);
-	straight(43, 127, false);
-	setMotorTarget(linkageMotor, -650, 40, false);
-	sleep(1500);
-	motor[clawMotor] = 75;
-	//setMotorTarget(clawMotor, .50 * countsPerRev, 75, false);
-	sleep(750);
-	setMotorTarget(linkageMotor, 0, 40, false);
-	sleep(500);
-	straight(-10, 127, false);
-	turn(.5, 100, false);
-	//setMotorTarget(leftLift, -900, 100, false);
-	motor[leftLift] = 100;
-	sleep(600);
-	motor[leftLift] = 0;
-	//straight(-24, 127, false);
-	//motor[leftLift] = -100;
-	//sleep(600);
-	//motor[leftLift] = 0;
-	//straight(60, 127, false);*/
-
-
-
 }
 
 /*---------------------------------------------------------------------------*/
@@ -274,7 +186,6 @@ task usercontrol()
 
 	while (true)
 	{
-
 		leftSpeed = (vexRT[Ch3] * 3) / 4;
 		rightSpeed = (vexRT[Ch2] * 3) / 4;
 
@@ -319,8 +230,6 @@ task usercontrol()
 
 		motor[leftLift] = -vexRT[Ch3Xmtr2];
 
-
-
 		if (vexRT[Btn7UXmtr2]) {
 			motor[clawMotor] = 127;
 			pinch = false;
@@ -332,6 +241,5 @@ task usercontrol()
 		} else if (!pinch) {
 			motor[clawMotor] = 0;
 		}
-
 	}
 }
